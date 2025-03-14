@@ -122,8 +122,6 @@ void Diagram::Function()
 	type_lex lex;
 	int type;
 
-	//Type();
-	//
 	type = LookForward(1);
 	if (type != typeVoid)
 	{
@@ -131,7 +129,7 @@ void Diagram::Function()
 		scaner->PrintError("найдена ошибка в типе функции, ожидался тип данных (void), ", lex);
 	}
 	type = Scan(lex);
-	//
+	
 
 	type = Scan(lex);
 	if (type != typeId && type != typeMain)
@@ -145,7 +143,7 @@ void Diagram::Function()
 		scaner->PrintError("найдена ошибка в структуре Function, ожидался символ '(', ", lex);
 	}
 
-	// Обрабатываем параметры функции, если они есть
+	//Обрабатываем параметры функции, если они есть
 	type = LookForward(1);
 	if (type == typeInt || type == typeShort || type == typeLong || type == typeFloat)
 	{
@@ -255,21 +253,7 @@ void Diagram::Operator()
 	type_lex lex;
 	int type = LookForward(1);
 
-	if (type == typeReturn)
-	{
-		type = Scan(lex);
-
-		Expression();
-
-		type = Scan(lex);
-		if (type != typeSemicolon)
-		{
-			scaner->PrintError("найдена ошибка в структуре Operator, ожидался символ ';' после return <выражение>, ", lex);
-		}
-		return;
-	}
-
-	if (type == typeSemicolon) // пустой оператор
+	if (type == typeSemicolon) //пустой оператор
 	{
 		type = Scan(lex);
 		return;
@@ -281,9 +265,9 @@ void Diagram::Operator()
 		return;
 	}
 
-	if (type == typeFor)
+	if (type == typeSwitch)
 	{
-		For_operator();
+		Switch_operator();
 		return;
 	}
 
@@ -312,76 +296,10 @@ void Diagram::Operator()
 	scaner->PrintError("найдена ошибка в структуре Operator, ожидался оператор, ", lex);
 }
 
-void Diagram::For_operator()
-{
-	type_lex lex;
-	int type;
-
-	type = Scan(lex);
-	if (type != typeFor)
-	{
-		scaner->PrintError("найдена ошибка в структуре For_operator, ожидалось ключевое слово 'for', ", lex);
-	}
-
-	type = Scan(lex);
-	if (type != typeLeftBracket)
-	{
-		scaner->PrintError("найдена ошибка в структуре For_operator, ожидался символ '(', ", lex);
-	}
-
-	type = LookForward(1);
-
-	if (type == typeInt || type == typeShort || type == typeLong || type == typeConst)
-	{
-		Data();
-	}
-	else if (type != typeSemicolon)
-	{
-		Assignment();
-		type = Scan(lex);
-		if (type != typeSemicolon)
-		{
-			scaner->PrintError("найдена ошибка в структуре For_operator, ожидался символ ';', ", lex);
-		}
-	}
-	else
-	{
-		type = Scan(lex);
-		if (type != typeSemicolon)
-		{
-			scaner->PrintError("найдена ошибка в структуре For_operator, ожидался символ ';', ", lex);
-		}
-	}
-
-	type = LookForward(1);
-	if (type != typeSemicolon)
-	{
-		Expression();
-	}
-	type = Scan(lex);
-	if (type != typeSemicolon)
-	{
-		scaner->PrintError("найдена ошибка в структуре For_operator, ожидался символ ';', ", lex);
-	}
-
-	type = LookForward(1);
-	if (type != typeRightBracket)
-	{
-		Assignment();
-	}
-	type = Scan(lex);
-	if (type != typeRightBracket)
-	{
-		scaner->PrintError("найдена ошибка в структуре For_operator, ожидался символ ')', ", lex);
-	}
-
-	OperatorsAndDescriptions();
-}
-
 void Diagram::FunctionCall()
 {
 	type_lex lex;
-	int type, next;
+	int type, next, exit;
 
 	type = Scan(lex);
 	if (type != typeId)
@@ -395,15 +313,16 @@ void Diagram::FunctionCall()
 		scaner->PrintError("найдена ошибка в структуре FunctionCall, ожидался символ '(', ", lex);
 	}
 
-	// Обрабатываем параметры функции, если они есть
+	//Обрабатываем параметры функции, если они есть
 	type = LookForward(1);
 	next = -1;
-	if (type == typeId || type == typeConstInt) //Тут должна быть вещественная константа
+	exit = -1;
+	if (type == typeId || type == typeConstInt || type == typeConstFloat)
 	{
-		// Обрабатываем список параметров
+		//Обрабатываем список параметров
 		do {
-			// Обрабатываем значение параметра (идентификатор или константа)
-			if (type == typeId || type == typeConstInt) //Тут должна быть вещественная константа
+			//Обрабатываем значение параметра (идентификатор или константа)
+			if (type == typeId || type == typeConstInt || type == typeConstFloat)
 			{
 				type = Scan(lex);
 			}
@@ -412,9 +331,10 @@ void Diagram::FunctionCall()
 				scaner->PrintError("найдена ошибка в структуре FunctionCall, ожидался идентификатор или константа, ", lex);
 			}
 
-			// Проверяем, есть ли следующий параметр
+			//Проверяем, есть ли следующий параметр
 			type = LookForward(1);
-			if (type == typeComma)
+			exit = LookForward(2);
+			if (type == typeComma && (exit == typeId || exit == typeConstInt || exit == typeConstFloat))
 			{
 				next = Scan(lex);
 				type = LookForward(1);
@@ -448,7 +368,7 @@ void Diagram::Expression()
 		type = LookForward(1);
 	}
 
-	if (type != typeSemicolon && type != typeRightBracket && type != typeComma)
+	if (type != typeSemicolon && type != typeRightBracket && type != typeComma && type != typeColon)
 	{
 		type = Scan(lex);
 		scaner->PrintError("найдена ошибка в структуре Expression, ожидался логический оператор, ';', ')' или ',', ", lex);
@@ -525,7 +445,7 @@ void Diagram::ElementaryExpression()
 		}
 		return;
 	}
-	if (type == typeConstInt || type == typeConstLongInt || type == typeConstHex || type == typeConstLongHex)
+	if (type == typeConstInt || type == typeConstLongInt || type == typeConstFloat  || type == typeConstChar)
 	{
 		type = Scan(lex);
 		return;
@@ -551,7 +471,7 @@ void Diagram::ParameterList()
 	int type;
 
 	do {
-		// Обрабатываем тип параметра
+		//Обрабатываем тип параметра
 		type = LookForward(1);
 		if (type != typeInt && type != typeShort && type != typeLong && type != typeFloat)
 		{
@@ -559,18 +479,92 @@ void Diagram::ParameterList()
 		}
 		type = Scan(lex); // Пропускаем тип
 
-		// Обрабатываем идентификатор параметра
+		//Обрабатываем идентификатор параметра
 		type = Scan(lex);
 		if (type != typeId)
 		{
 			scaner->PrintError("найдена ошибка в структуре ParameterList, ожидался идентификатор параметра, ", lex);
 		}
 
-		// Проверяем, есть ли следующий параметр
+		//Проверяем, есть ли следующий параметр
 		type = LookForward(1);
 		if (type == typeComma)
 		{
-			type = Scan(lex); // Пропускаем запятую
+			type = Scan(lex); //Пропускаем запятую
 		}
 	} while (type == typeComma);
+}
+
+void Diagram::Switch_operator()
+{
+	type_lex lex;
+	int type;
+
+	type = Scan(lex);
+	if (type != typeSwitch)
+	{
+		scaner->PrintError("Ошибка: ожидалось ключевое слово 'switch'", lex);
+	}
+
+	type = Scan(lex);
+	if (type != typeLeftBracket)
+	{
+		scaner->PrintError("Ошибка: ожидался символ '('", lex);
+	}
+
+	Expression();
+
+	type = Scan(lex);
+	if (type != typeRightBracket)
+	{
+		scaner->PrintError("Ошибка: ожидался символ ')'", lex);
+	}
+
+	type = Scan(lex);
+	if (type != typeLeftBrace)
+	{
+		scaner->PrintError("Ошибка: ожидался символ '{'", lex);
+	}
+
+	type = LookForward(1);
+	while (type == typeCase || type == typeDefault)
+	{
+		CaseOperator();
+		type = LookForward(1);
+	}
+
+	type = Scan(lex);
+	if (type != typeRightBrace)
+	{
+		scaner->PrintError("Ошибка: ожидался символ '}'", lex);
+	}
+}
+
+void Diagram::CaseOperator()
+{
+	type_lex lex;
+	int type = Scan(lex);
+	int next;
+
+	if (type != typeCase && type != typeDefault)
+	{
+		scaner->PrintError("Ошибка: ожидалось ключевое слово 'case' или 'default'", lex);
+	}
+
+	if (type == typeCase)
+	{
+		Expression();
+	}
+
+	type = Scan(lex);
+	if (type != typeColon)
+	{
+		scaner->PrintError("Ошибка: ожидался символ ':'", lex);
+	}
+
+	next = LookForward(1);
+	if (next != typeCase && next != typeDefault)
+	{
+		OperatorsAndDescriptions();
+	}
 }

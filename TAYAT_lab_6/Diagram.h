@@ -21,10 +21,11 @@ private:
 	void Multiplier();						// Множитель
 	void UnaryOperation();					// Унарная операция
 	void ElementaryExpression();			// Элементарное выражение
-	void For_operator();					// Цикл
 	int LookForward(int pointer);
 	int Scan(type_lex lex);
 	void ParameterList();					//Список параметров
+	void Switch_operator();					//Оператор Switch
+	void CaseOperator();					//
 
 public:
 	Diagram(Scaner* scaner);

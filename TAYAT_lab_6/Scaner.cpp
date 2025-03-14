@@ -1,19 +1,16 @@
 #include "Scaner.h"
 
-/**
-* Список допустимых ключевых слов в программе
-*/
+
+//Список допустимых ключевых слов в программе
 type_lex keyword[maxKeyword] =
 {
-    "int", "short", "long", "main", "return", "for", "const", "float", "void"
+    "int", "short", "long", "float", "void", "main", "const", "switch", "case", "default",
 };
 
-/**
-* Список идентификаторов, которые соответствуют допустимым ключевым словам в программе
-*/
+//Cписок идентификаторов, которые соответствуют допустимым ключевым словам в программе
 int indexKeyword[maxKeyword] =
 {
-    typeInt, typeShort, typeLong, typeMain, typeReturn, typeFor, typeConst, typeFloat, typeVoid,
+    typeInt, typeShort, typeLong, typeFloat, typeVoid, typeMain, typeConst, typeSwitch, typeCase, typeDefault
 };
 
 //Ошибка если файл пустой
@@ -42,10 +39,10 @@ void Scaner::GetData(const std::string& filename)
     {
         std::stringstream buffer;
         buffer << file.rdbuf();
-        text = buffer.str(); // Сохраняем текст из файла
+        text = buffer.str(); //Сохраняем текст из файла
         text += '\n';
 
-        // Определяем позиции перевода строки
+        //Определяем позиции перевода строки
         for (size_t i = 0; i < text.size(); ++i) {
             if (text[i] == '\n') {
                 lineBreakPositions.push_back(i);
@@ -91,20 +88,20 @@ int Scaner::UseScaner(type_lex lex)
 
     while (true)
     {
-        // Пропускаем пробелы
+        //Пропускаем пробелы
         while (uk < text.size() && (text[uk] == ' ' || text[uk] == '\t' || text[uk] == '\n'))
         {
             uk++;
         }
 
-        // Конец программы 
+        //Конец программы 
         if (uk >= text.size())
         {
             lex[i] = '\0';
             return typeEnd;
         }
 
-        // Обработка комментариев
+        //Обработка комментариев
         if (text[uk] == '/')
         {
             uk++;
@@ -118,88 +115,117 @@ int Scaner::UseScaner(type_lex lex)
             }
             else
             {
-                // Деление
+                //Деление
                 lex[i++] = '/';
                 lex[i++] = '\0';
                 return typeDiv;
             }
         }
 
-        // Обработка чисел
-        if (isdigit(text[uk]))
+        //Символьные константы
+        if (text[uk] == '\'')
         {
-            if (text[uk] == '0')
+            uk++;
+            lex[i++] = '\'';
+            lex[i++] = text[uk++]; //Считываем символ
+            if (text[uk] == '\'')
             {
-                lex[i++] = text[uk++];
-
-                if (text[uk] == 'x')
-                {
-                    lex[i++] = text[uk++];
-                    while (uk < text.size() && (isdigit(text[uk]) || (text[uk] >= 'A' && text[uk] <= 'F') || (text[uk] >= 'a' && text[uk] <= 'f')) && i < maxHexNumber - 1)
-                    {
-                        lex[i++] = text[uk++];
-                    }
-
-                    if (i == maxHexNumber - 1 && uk < text.size() && (isdigit(text[uk]) || (text[uk] >= 'A' && text[uk] <= 'F') || (text[uk] >= 'a' && text[uk] <= 'f')))
-                    {
-                        while (uk < text.size() && (isdigit(text[uk]) || (text[uk] >= 'A' && text[uk] <= 'F') || (text[uk] >= 'a' && text[uk] <= 'f')))
-                        {
-                            lex[i++] = text[uk++];
-                        }
-                        if (uk < text.size() && text[uk] == 'L')
-                        {
-                            lex[i++] = text[uk++];
-                        }
-                        lex[i] = '\0';
-                        PrintError("Константа превышает максимальную длину, максимум 7 цифр: ", lex);
-                        return typeError;
-                    }
-
-                    if (uk < text.size() && text[uk] == 'L')
-                    {
-                        lex[i++] = text[uk++];
-                        lex[i] = '\0';
-                        return typeConstLongHex;
-                    }
-
-                    lex[i] = '\0';
-                    return typeConstHex;
-                }
-            }
-
-            while (uk < text.size() && isdigit(text[uk]) && i < maxNumber - 1)
-            {
-                lex[i++] = text[uk++];
-            }
-
-            if (i == maxNumber - 1 && uk < text.size() && isdigit(text[uk]))
-            {
-                while (uk < text.size() && isdigit(text[uk]))
-                {
-                    lex[i++] = text[uk++];
-                }
-                if (uk < text.size() && text[uk] == 'L')
-                {
-                    lex[i++] = text[uk++];
-                }
+                lex[i++] = '\'';
                 lex[i] = '\0';
-                PrintError("Константа превышает максимальную длину, максимум 9 цифр: ", lex);
+                uk++;
+                return typeConstChar;
+            }
+            else
+            {
+                lex[i] = '\0';
+                PrintError("Ошибка: некорректная символьная константа ", lex);
                 return typeError;
             }
+        }
 
-            if (uk < text.size() && text[uk] == 'L')
+        //Вещественные числа в экспоненциальной форме
+        if (isdigit(text[uk]) && (text[uk + 1] == '.') || (text[uk] == '.' && isdigit(text[uk + 1])) || isdigit(text[uk]) && (text[uk + 1] == 'e' || text[uk + 1] == 'E'))
+        {
+            bool hasDot = false, hasExp = false;
+            while (isdigit(text[uk]) || text[uk] == '.' || (text[uk] == 'e' || text[uk] == 'E') || text[uk] == '+' || text[uk] == '-')
+            {
+                if (text[uk] == '.')
+                {
+                    if (hasDot || hasExp) break;
+                    hasDot = true;
+                }
+                else if (text[uk] == 'e' || text[uk] == 'E')
+                {
+                    if (hasExp) break;
+                    hasExp = true;
+                    uk++;
+                    if (text[uk] == '+' || text[uk] == '-') lex[i++] = text[uk++];
+                    continue;
+                }
+                lex[i++] = text[uk++];
+            }
+            lex[i] = '\0';
+            return typeConstFloat;
+        }
+
+        //Обработка констант и чисел, начинающихся с 0
+        if (text[uk] == '0') {
+            i = 0;
+            lex[i++] = text[uk++];
+
+            //Обработка десятичных чисел, начинающихся с 0 (например, "0123")
+            while (isdigit(text[uk])) // maxDecLex - максимальная длина для обычных чисел
             {
                 lex[i++] = text[uk++];
-                lex[i] = '\0';
-                return typeConstLongInt;
+
+                //Проверка на превышение длины обычной константы
+                if (i > maxNumber)
+                {
+                    lex[i] = '\0';
+                    PrintError("Десятичная константа превышает допустимую длину", lex);
+                    return typeError;
+                }
+            }
+
+            if (text[uk] == 'L')
+            {
+                lex[i] = text[uk];  //Добавляем 'L' к lex
             }
 
             lex[i] = '\0';
-            return typeConstInt;
+            return typeConstInt;  //Обычное десятичное число, начинающееся с 0 (например, "0123")
+        }
+
+        //Обработка десятичных констант, начинающихся с 1...9
+        if (text[uk] >= '1' && text[uk] <= '9')
+        {
+            i = 0;
+
+            // Считываем десятичные цифры
+            while (isdigit(text[uk])) //maxDecLex - максимальная длина для обычных чисел
+            {
+                lex[i++] = text[uk++];
+            }
+
+            if (text[uk] == 'L')
+            {
+                lex[i] = text[uk];  //Добавляем 'L' к lex
+            }
+
+            //Проверка на превышение длины обычной константы
+            if (i > maxNumber)
+            {
+                lex[i] = '\0';
+                PrintError("Десятичная константа превышает допустимую длину", lex);
+                return typeError;
+            }
+
+            lex[i] = '\0';
+            return typeConstInt;  //Обычная десятичная константа
         }
 
 
-        // Обработка идентификаторов
+        //Обработка идентификаторов
         if (isalpha(text[uk]) || text[uk] == '_')
         {
             while (uk < text.size() && (isalnum(text[uk]) || text[uk] == '_') && i < maxLex - 1)
@@ -218,7 +244,7 @@ int Scaner::UseScaner(type_lex lex)
                 return typeError;
             }
 
-            // Проверяем, является ли идентификатор ключевым словом
+            //Проверяем, является ли идентификатор ключевым словом
             for (int j = 0; j < maxKeyword; j++)
             {
                 if (strcmp(lex, keyword[j]) == 0)
@@ -229,13 +255,15 @@ int Scaner::UseScaner(type_lex lex)
             return typeId;
         }
 
-        // Обработка специальных символов
+        //Обработка специальных символов
         switch (text[uk])
         {
         case ',':
             uk++; lex[i++] = ','; lex[i] = '\0'; return typeComma;
         case ';':
             uk++; lex[i++] = ';'; lex[i] = '\0'; return typeSemicolon;
+        case ':':
+            uk++; lex[i++] = ':'; lex[i] = '\0'; return typeColon;
         case '(':
             uk++; lex[i++] = '('; lex[i] = '\0'; return typeLeftBracket;
         case ')':

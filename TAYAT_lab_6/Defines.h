@@ -19,12 +19,13 @@ typedef char type_lex[maxLex];  // Лексема
 #define typeInt 1
 #define typeShort 2
 #define typeLong 3
-#define typeFor 4
-#define typeReturn 5
+#define typeFloat 4
+#define typeVoid 5
 #define typeMain 6
 #define typeConst 7
-#define typeFloat 8
-#define typeVoid 9
+#define typeSwitch 8
+#define typeCase 9
+#define typeDefault 10
 
 /**
 * Тип лексем
@@ -36,8 +37,8 @@ typedef char type_lex[maxLex];  // Лексема
 */
 #define typeConstInt 30
 #define typeConstLongInt 31
-#define typeConstHex 32
-#define typeConstLongHex 33
+#define typeConstChar 32
+#define typeConstFloat 33
 
 /**
 * Знаки операций
@@ -55,6 +56,8 @@ typedef char type_lex[maxLex];  // Лексема
 #define typeMoreOrEq 50			// >=
 #define typeEval 51				// =
 
+
+
 /**
 * Специальные знаки
 */
@@ -64,6 +67,7 @@ typedef char type_lex[maxLex];  // Лексема
 #define typeRightBracket 63		// )
 #define typeLeftBrace 64		// {
 #define typeRightBrace 65		// }
+#define typeColon 66			// :
 
 /**
 * Дополнительно
