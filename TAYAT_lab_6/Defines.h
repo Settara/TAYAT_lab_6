@@ -12,33 +12,29 @@
 typedef char type_mod[maxText]; // Текст
 typedef char type_lex[maxLex];  // Лексема
 
+//Идентификатор
+#define TIdent  1
 
-/**
-* Ключевые слова
-*/
-#define typeInt 1
-#define typeShort 2
-#define typeLong 3
-#define typeFloat 4
-#define typeVoid 5
-#define typeMain 6
-#define typeConst 7
-#define typeSwitch 8
-#define typeCase 9
-#define typeDefault 10
+//Константы
+#define typeConstInt 11
+#define typeConstChar 12
+#define typeConstFloat 13
 
-/**
-* Тип лексем
-*/
-#define typeId 20
+//Ключевые слова
+#define typeInt 21
+#define typeShort 22
+#define typeLong 23
+#define typeFloat 24
+#define typeVoid 25
+#define typeMain 26
+#define typeConst 27
+#define typeSwitch 28
+#define typeCase 29
+#define typeDefault 30
 
-/**
-* Константы
-*/
-#define typeConstInt 30
-#define typeConstLongInt 31
-#define typeConstChar 32
-#define typeConstFloat 33
+
+
+
 
 /**
 * Знаки операций

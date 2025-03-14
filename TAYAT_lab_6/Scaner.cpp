@@ -252,7 +252,7 @@ int Scaner::UseScaner(type_lex lex)
                     return indexKeyword[j];
                 }
             }
-            return typeId;
+            return TIdent ;
         }
 
         //Обработка специальных символов

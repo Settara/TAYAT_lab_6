@@ -67,7 +67,7 @@ void Diagram::Data()
 	do {
 		type = LookForward(1);
 
-		if (type != typeId)
+		if (type != TIdent )
 		{
 			type = Scan(lex);
 			scaner->PrintError("найдена ошибка в структуре Data, ожидался идентификатор переменной, ", lex);
@@ -132,7 +132,7 @@ void Diagram::Function()
 	
 
 	type = Scan(lex);
-	if (type != typeId && type != typeMain)
+	if (type != TIdent  && type != typeMain)
 	{
 		scaner->PrintError("найдена ошибка в структуре Function, ожидался идентификатор функции или ключевое слово 'main', ", lex);
 	}
@@ -208,7 +208,7 @@ void Diagram::Assignment()
 	int type;
 
 	type = Scan(lex);
-	if (type != typeId)
+	if (type != TIdent )
 	{
 		scaner->PrintError("найдена ошибка в структуре Assignment, ожидался идентификатор переменной, ", lex);
 	}
@@ -272,7 +272,7 @@ void Diagram::Operator()
 	}
 
 	int type2 = LookForward(2);
-	if (type == typeId && type2 == typeLeftBracket)
+	if (type == TIdent  && type2 == typeLeftBracket)
 	{
 		FunctionCall();
 		type = Scan(lex);
@@ -283,7 +283,7 @@ void Diagram::Operator()
 		return;
 	}
 
-	if (type == typeId && type2 == typeEval)
+	if (type == TIdent  && type2 == typeEval)
 	{
 		Assignment();
 		type = Scan(lex);
@@ -302,7 +302,7 @@ void Diagram::FunctionCall()
 	int type, next, exit;
 
 	type = Scan(lex);
-	if (type != typeId)
+	if (type != TIdent )
 	{
 		scaner->PrintError("найдена ошибка в структуре FunctionCall, ожидался идентификатор функции, ", lex);
 	}
@@ -317,12 +317,12 @@ void Diagram::FunctionCall()
 	type = LookForward(1);
 	next = -1;
 	exit = -1;
-	if (type == typeId || type == typeConstInt || type == typeConstFloat)
+	if (type == TIdent  || type == typeConstInt || type == typeConstFloat)
 	{
 		//Обрабатываем список параметров
 		do {
 			//Обрабатываем значение параметра (идентификатор или константа)
-			if (type == typeId || type == typeConstInt || type == typeConstFloat)
+			if (type == TIdent  || type == typeConstInt || type == typeConstFloat)
 			{
 				type = Scan(lex);
 			}
@@ -334,7 +334,7 @@ void Diagram::FunctionCall()
 			//Проверяем, есть ли следующий параметр
 			type = LookForward(1);
 			exit = LookForward(2);
-			if (type == typeComma && (exit == typeId || exit == typeConstInt || exit == typeConstFloat))
+			if (type == typeComma && (exit == TIdent  || exit == typeConstInt || exit == typeConstFloat))
 			{
 				next = Scan(lex);
 				type = LookForward(1);
@@ -432,7 +432,7 @@ void Diagram::ElementaryExpression()
 {
 	type_lex lex;
 	int type = LookForward(1);
-	if (type == typeId)
+	if (type == TIdent )
 	{
 		type = LookForward(2);
 		if (type == typeLeftBracket)
@@ -445,7 +445,7 @@ void Diagram::ElementaryExpression()
 		}
 		return;
 	}
-	if (type == typeConstInt || type == typeConstLongInt || type == typeConstFloat  || type == typeConstChar)
+	if (type == typeConstInt || type == typeConstFloat  || type == typeConstChar)
 	{
 		type = Scan(lex);
 		return;
@@ -481,7 +481,7 @@ void Diagram::ParameterList()
 
 		//Обрабатываем идентификатор параметра
 		type = Scan(lex);
-		if (type != typeId)
+		if (type != TIdent )
 		{
 			scaner->PrintError("найдена ошибка в структуре ParameterList, ожидался идентификатор параметра, ", lex);
 		}
