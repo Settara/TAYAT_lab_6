@@ -39,7 +39,7 @@ void Diagram::Program()
 		{
 			Named_const();
 		}
-		if ((type == typeInt || type == typeShort || type == typeLong || type == typeFloat || type == typeConst) && simbol != typeLeftBracket && simbol2 != typeLeftBracket)
+		if ((type == typeInt || type == typeShort || type == typeLong || type == typeFloat) && simbol != typeLeftBracket && simbol2 != typeLeftBracket)
 		{
 			Data();
 		}
@@ -197,7 +197,7 @@ void Diagram::Type()
 	if (type != typeInt && type != typeShort && type != typeLong && type != typeFloat)
 	{
 		type = Scan(lex);
-		scaner->PrintError("найдена ошибка в структуре Type, ожидалс€ тип данных (int, short, long), ", lex);
+		scaner->PrintError("найдена ошибка в структуре Type, ожидалс€ тип данных (int, short, long, float), ", lex);
 	}
 	type = Scan(lex);
 }
