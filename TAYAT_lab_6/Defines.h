@@ -36,9 +36,7 @@ typedef char type_lex[maxLex];  // Лексема
 
 
 
-/**
-* Знаки операций
-*/
+//Знаки операций
 #define typePlus 40			    // +
 #define typeMinus 41			// -
 #define typeMul 42				// *
@@ -54,9 +52,7 @@ typedef char type_lex[maxLex];  // Лексема
 
 
 
-/**
-* Специальные знаки
-*/
+//Специальные знаки
 #define typeSemicolon 60		// ;
 #define typeComma 61			// ,
 #define typeLeftBracket 62		// (
@@ -65,8 +61,6 @@ typedef char type_lex[maxLex];  // Лексема
 #define typeRightBrace 65		// }
 #define typeColon 66			// :
 
-/**
-* Дополнительно
-*/
+//Дополнительно
 #define typeEnd 100
 #define typeError 404
